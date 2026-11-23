@@ -7,9 +7,10 @@
  * "I was pressed!" and nothing.
  */
 pros::Controller master(pros::E_CONTROLLER_MASTER);
-pros::MotorGroup left_mg({15, 17}, pros::MotorGearset::green);    // Creates a motor group with forwards ports 1 & 3 and reversed port 2
+pros::MotorGroup left_mg({-15, -17}, pros::MotorGearset::green);    // Creates a motor group with forwards ports 1 & 3 and reversed port 2
 pros::MotorGroup right_mg({20, 18}, pros::MotorGearset::green);
 pros::MotorGroup claw ({13},pros::MotorGearset::red);
+
 // pros::ADIDigitalOut claw('A'); // Create a pneumatic in port A
 pros::MotorGroup lift({-19, 16}, pros::MotorGearset::red);
 
@@ -53,7 +54,7 @@ void on_center_button() {
  */
 void initialize() {
 	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User 2!");
+	pros::lcd::set_text(1, "He");
     chassis.calibrate();
 
 	// pros::lcd::register_btn1_cb(on_center_button);
@@ -89,13 +90,30 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	chassis.setPose(-62.5, 0, -90);
-    chassis.moveToPoint(-57.7, 0, 1100, {.forwards = false, .minSpeed = 100});
-    chassis.moveToPoint(-63.4, 0, 1100);
-    chassis.moveToPoint(-46.3, 0, 2050, {.forwards = false});
-    chassis.turnToHeading(179, 1100);
-    chassis.moveToPoint(-47.7, -16, 2050);
+
+//     right_mg.move_velocity(100);
+// 	left_mg.move_velocity(100);
+// 	pros::delay(500);
+//   right_mg.move_velocity(-100);
+//   left_mg.move_velocity(-100);
+//   pros::delay(500);
+//   right_mg.move_velocity(100);
+//   left_mg.move_velocity(100);
+// 	pros::delay(500);
+// 	right_mg.move_velocity(-100);
+//   left_mg.move_velocity(-100);
+//   pros::delay(500);
+//   right_mg.brake();
+//   left_mg.brake();
 }
+	// claw.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	// chassis.setPose(-0.1, 62.5, 180);
+	// chassis.moveToPoint(19.1, 50.3, 2650);
+
+	// claw.move(50);
+    // pros::delay(300);
+    // claw.brake();
+
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -127,11 +145,20 @@ void opcontrol() {
 		//                  (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0); 
         // // Left joystick Y-axis controls forward/backward (Linear)
         // Tank Drive
+
 		int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-
+		int rightY = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
+		claw.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
         // Drive
-        chassis.arcade(-rightX , -leftY);
+		
+		chassis.tank(leftY, rightY);
+			
+		
+			// chassis.arcade(-rightX , -leftY);
+		
+        
+
 		
 		
 		
@@ -164,12 +191,15 @@ void opcontrol() {
 			lift.move(0);
 		}
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-			claw.move(127)
+			claw.move(50);
 			master.set_text(0, 0, "L1 PRESSED");
 		}
 		else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-			claw.move(-127) // Close claw
+			claw.move(-50); // Close claw
 			master.set_text(0, 0, "L2 PRESSED");
+		}
+		else{
+			claw.brake();
 		}
 		// if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
         //     autonomous();
